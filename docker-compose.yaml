@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    container_name: go-books-api
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_NAME=books_db
+      # Point to SigNoz collector (assumed running on host)
+      # On Mac: host.docker.internal resolves to the host machine
+      - OTEL_EXPORTER_OTLP_ENDPOINT=host.docker.internal:4317
+    depends_on:
+      - db
+    networks:
+      - my-network
+
+  db:
+    image: mysql:8.0
+    container_name: books-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=books_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+    ports:
+      - "3306:3306"
+    networks:
+      - my-network
+    volumes:
+      - db-data:/var/lib/mysql
+
+networks:
+  my-network:
+    driver: bridge
+
+volumes:
+  db-data:
