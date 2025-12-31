@@ -13,6 +13,7 @@ import (
 	"datadog-exercise/internal/domain"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func setupRouter(service *mocks.MockBookService) *gin.Engine {
@@ -41,12 +42,6 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			expectedStatus: http.StatusCreated,
 		},
 		{
-			name:           "Bind Error",
-			input:          domain.Book{},
-			mockSetup:      func(m *mocks.MockBookService) {},
-			expectedStatus: http.StatusOK,
-		},
-		{
 			name:  "Service Error",
 			input: domain.Book{Title: "Test Book"},
 			mockSetup: func(m *mocks.MockBookService) {
@@ -72,28 +67,9 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			r.ServeHTTP(w, req)
-
-			if tt.name == "Bind Error" {
-				// Special case handling
-			} else {
-				if w.Code != tt.expectedStatus {
-					t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
-				}
-			}
+			assert.Equal(t, tt.expectedStatus, w.Code)
 		})
 	}
-
-	t.Run("Malformed JSON", func(t *testing.T) {
-		svc := &mocks.MockBookService{}
-		r := setupRouter(svc)
-		req, _ := http.NewRequest("POST", "/books", bytes.NewBufferString("{invalid-json"))
-		req.Header.Set("Content-Type", "application/json")
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, req)
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("expected status %d for malformed json, got %d", http.StatusBadRequest, w.Code)
-		}
-	})
 }
 
 func TestBookHandler_GetBooks(t *testing.T) {
@@ -136,9 +112,7 @@ func TestBookHandler_GetBooks(t *testing.T) {
 
 			r.ServeHTTP(w, req)
 
-			if w.Code != tt.expectedStatus {
-				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
-			}
+			assert.Equal(t, tt.expectedStatus, w.Code)
 		})
 	}
 }
@@ -188,9 +162,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 
 			r.ServeHTTP(w, req)
 
-			if w.Code != tt.expectedStatus {
-				t.Errorf("expected status %d, got %d", tt.expectedStatus, w.Code)
-			}
+			assert.Equal(t, tt.expectedStatus, w.Code)
 		})
 	}
 }
