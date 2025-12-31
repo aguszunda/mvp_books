@@ -1,0 +1,58 @@
+name: Go Backend Quality Gate
+
+on:
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache: true # Optimiza la velocidad cacheando dependencias
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          # Opcional: si quieres que falle solo con errores graves
+          # args: --severity-level=error 
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run Tests with Coverage
+        run: |
+          go test ./... -v -coverprofile=coverage.out
+
+      - name: Check Coverage Threshold (85%)
+        run: |
+          sudo apt-get install -y bc
+          # Extraemos el valor numérico de la cobertura
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+          
+          # Si el coverage es un entero exacto (ej. 90), el regex anterior podría fallar. 
+          # Este ajuste asegura que siempre obtengamos un número:
+          if [ -z "$COVERAGE" ]; then
+            COVERAGE=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+' | head -1)
+          fi
+          
+          echo "Total coverage: $COVERAGE%"
+          
+          THRESHOLD=85.0
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "-------------------------------------------------------"
+            echo "ERROR: Cobertura insuficiente ($COVERAGE%). Se requiere $THRESHOLD%"
+            echo "-------------------------------------------------------"
+            exit 1
+          fi
