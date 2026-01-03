@@ -34,17 +34,19 @@ jobs:
       - name: Run Tests with Coverage
         run: |
           go test ./... -v -coverprofile=coverage.out
+          # Filtramos paquetes que no requieren coverage (misma lógica que en Makefile)
+          grep -v -E "cmd/|mocks/|internal/domain|internal/port|internal/infrastructure" coverage.out > coverage.filtered.out
 
       - name: Check Coverage Threshold (85%)
         run: |
           sudo apt-get install -y bc
-          # Extraemos el valor numérico de la cobertura
-          COVERAGE=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+          # Extraemos el valor numérico de la cobertura filtrada
+          COVERAGE=$(go tool cover -func=coverage.filtered.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
           
           # Si el coverage es un entero exacto (ej. 90), el regex anterior podría fallar. 
           # Este ajuste asegura que siempre obtengamos un número:
           if [ -z "$COVERAGE" ]; then
-            COVERAGE=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+' | head -1)
+            COVERAGE=$(go tool cover -func=coverage.filtered.out | grep total | grep -Eo '[0-9]+' | head -1)
           fi
           
           echo "Total coverage: $COVERAGE%"
