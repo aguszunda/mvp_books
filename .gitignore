@@ -16,6 +16,6 @@
 
 # Go workspace file
 go.work
-
+scripts
 main
-api
+# api

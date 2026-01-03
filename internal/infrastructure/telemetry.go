@@ -38,7 +38,7 @@ func InitProvider() func(context.Context) error {
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	conn, err := grpc.DialContext(ctx, target,
+	conn, err := grpc.NewClient(target,
 		// Note the use of insecure transport here. TLS is recommended in production.
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
