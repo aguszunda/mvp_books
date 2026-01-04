@@ -17,7 +17,11 @@ import (
 func main() {
 	// 1. Initialize OpenTelemetry
 	shutdown := infrastructure.InitProvider()
-	defer shutdown(context.Background())
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Printf("failed to shutdown TracerProvider: %v", err)
+		}
+	}()
 
 	// 2. Initialize Database
 	db, err := infrastructure.InitDB()
@@ -27,7 +31,9 @@ func main() {
 
 	// 3. Run Migrations
 	// Note: In production, use a proper migration tool (e.g., golang-migrate)
-	db.AutoMigrate(&domain.Book{})
+	if err := db.AutoMigrate(&domain.Book{}); err != nil {
+		log.Fatal(err)
+	}
 
 	// 4. Initialize Dependency Injection
 	bookRepo := repository.NewMysqlBookRepository(db)

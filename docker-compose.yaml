@@ -5,8 +5,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_USER=user
-      - DB_PASSWORD=password
+      - DB_USER=root
+      - DB_PASSWORD=admin2023
       - DB_HOST=db
       - DB_NAME=books_db
       # Point to SigNoz collector (assumed running on host)
@@ -21,7 +21,7 @@ services:
     image: mysql:8.0
     container_name: books-db
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_ROOT_PASSWORD=admin2023
       - MYSQL_DATABASE=books_db
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
