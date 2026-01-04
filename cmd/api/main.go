@@ -17,7 +17,11 @@ import (
 func main() {
 	// 1. Initialize OpenTelemetry
 	shutdown := infrastructure.InitProvider()
-	defer shutdown(context.Background())
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Printf("failed to shutdown TracerProvider: %v", err)
+		}
+	}()
 
 	// 2. Initialize Database
 	db, err := infrastructure.InitDB()
