@@ -27,7 +27,9 @@ func main() {
 
 	// 3. Run Migrations
 	// Note: In production, use a proper migration tool (e.g., golang-migrate)
-	db.AutoMigrate(&domain.Book{})
+	if err := db.AutoMigrate(&domain.Book{}); err != nil {
+		log.Fatal(err)
+	}
 
 	// 4. Initialize Dependency Injection
 	bookRepo := repository.NewMysqlBookRepository(db)
