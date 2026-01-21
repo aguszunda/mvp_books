@@ -12,18 +12,7 @@ import (
 )
 
 func InitDB() (*gorm.DB, error) {
-	dbPort := os.Getenv("DB_PORT")
-	if dbPort == "" {
-		dbPort = "3306"
-	}
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		dbPort,
-		os.Getenv("DB_NAME"),
-	)
+	dsn := GetDSN()
 
 	var db *gorm.DB
 	var err error
@@ -47,4 +36,19 @@ func InitDB() (*gorm.DB, error) {
 	}
 
 	return nil, fmt.Errorf("could not connect to database after retries: %v", err)
+}
+
+func GetDSN() string {
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "3306"
+	}
+
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		dbPort,
+		os.Getenv("DB_NAME"),
+	)
 }
