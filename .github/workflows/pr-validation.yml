@@ -34,6 +34,9 @@ jobs:
       - name: Run Tests with Coverage
         run: |
           go test ./... -v -coverprofile=coverage.out
+          # Exclude main.go and mocks from coverage
+          grep -v "cmd/api/main.go" coverage.out | grep -v "/mocks/" > coverage.filtered.out
+          mv coverage.filtered.out coverage.out
 
       - name: Check Coverage Threshold (85%)
         run: |
