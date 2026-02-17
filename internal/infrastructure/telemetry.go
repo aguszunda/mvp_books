@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -35,11 +36,8 @@ func InitProvider() func(context.Context) error {
 
 	log.Printf("Connecting to OTEL collector at %s", target)
 
-<<<<<<< HEAD
-=======
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
->>>>>>> main
 	conn, err := grpc.NewClient(target,
 		// Note the use of insecure transport here. TLS is recommended in production.
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

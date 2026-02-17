@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,6 @@ import (
 )
 
 func main() {
-<<<<<<< HEAD
 	// 1. Initialize OpenTelemetry
 	shutdown := infrastructure.InitProvider()
 	defer func() {
@@ -23,18 +23,13 @@ func main() {
 	}()
 
 	// 2. Initialize Database
-=======
->>>>>>> main
 	db, err := infrastructure.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-<<<<<<< HEAD
 	// 3. Run Migrations
 	// Note: In production, use a proper migration tool (e.g., golang-migrate)
-=======
->>>>>>> main
 	if err := db.AutoMigrate(&domain.Book{}); err != nil {
 		log.Fatal(err)
 	}
