@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"datadog-exercise/internal/adapter/handler"
-	"datadog-exercise/internal/adapter/repository"
+	"datadog-exercise/internal/controller"
 	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/infrastructure"
+	"datadog-exercise/internal/repository"
 	"datadog-exercise/internal/service"
+	"datadog-exercise/platform"
 )
 
 func main() {
-	db, err := infrastructure.InitDB()
+	db, err := platform.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func main() {
 
 	bookRepo := repository.NewMysqlBookRepository(db)
 	bookService := service.NewBookService(bookRepo)
-	bookHandler := handler.NewBookHandler(bookService)
+	bookHandler := controller.NewBookHandler(bookService)
 
 	r := gin.Default()
 

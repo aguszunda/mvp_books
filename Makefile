@@ -1,4 +1,4 @@
-.PHONY: test coverage
+.PHONY: test coverage run docker-up docker-down
 
 test:
 	go test ./... -v
@@ -6,8 +6,8 @@ test:
 coverage:
 	@echo "Running tests with coverage..."
 	@go test ./... -coverprofile=coverage.out > /dev/null
-	@echo "Filtering out cmd, mocks, domain, port, and infrastructure..."
-	@grep -v -E "cmd/|mocks/|internal/domain|internal/port|internal/infrastructure" coverage.out > coverage.filtered.out
+	@echo "Filtering out platform, mocks, and domain (interfaces)..."
+	@grep -v -E "cmd/|mocks/|internal/domain|platform" coverage.out > coverage.filtered.out
 	@go tool cover -func=coverage.filtered.out
 	@echo "------------------------------------------------------------------"
 	@echo "Real Logic Coverage:"
@@ -17,3 +17,12 @@ uncovered: coverage
 	@echo "------------------------------------------------------------------"
 	@echo "Functions with 0% coverage (Potential missing tests):"
 	@go tool cover -func=coverage.filtered.out | grep "0.0%" || echo "🎉 All logic is covered!"
+
+run:
+	go run cmd/api/main.go
+
+docker-up:
+	docker-compose up -d --build
+
+docker-down:
+	docker-compose down

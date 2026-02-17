@@ -4,25 +4,24 @@ import (
 	"context"
 
 	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/port"
 )
 
-type BookService struct {
-	repo port.BookRepository
+type bookService struct {
+	repo domain.BookRepository
 }
 
-func NewBookService(repo port.BookRepository) port.BookService {
-	return &BookService{repo: repo}
+func NewBookService(repo domain.BookRepository) BookService {
+	return &bookService{repo: repo}
 }
 
-func (s *BookService) Create(ctx context.Context, book *domain.Book) error {
+func (s *bookService) Create(ctx context.Context, book *domain.Book) error {
 	return s.repo.Create(ctx, book)
 }
 
-func (s *BookService) GetAll(ctx context.Context) ([]domain.Book, error) {
+func (s *bookService) GetAll(ctx context.Context) ([]domain.Book, error) {
 	return s.repo.FindAll(ctx)
 }
 
-func (s *BookService) GetOne(ctx context.Context, id string) (*domain.Book, error) {
+func (s *bookService) GetOne(ctx context.Context, id string) (*domain.Book, error) {
 	return s.repo.FindByID(ctx, id)
 }
