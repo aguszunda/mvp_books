@@ -1,11 +1,13 @@
-name: Go Backend Quality Gate
+name: tests and build
 
 on:
   pull_request:
     branches: [ develop, main ]
+permissions:
+  contents: read
 
 jobs:
-  validate:
+  test_and_build:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: '1.24'
           cache: true # Optimiza la velocidad cacheando dependencias
 
       - name: Install dependencies

@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 
 	"datadog-exercise/internal/domain"
 	"datadog-exercise/internal/port"
@@ -26,10 +24,6 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Get the current span (Tracing logic preserved from original)
-	span := trace.SpanFromContext(c.Request.Context())
-	span.SetAttributes(attribute.String("book.title", book.Title))
 
 	if err := h.service.Create(c.Request.Context(), &book); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
