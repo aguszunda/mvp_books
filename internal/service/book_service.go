@@ -4,13 +4,20 @@ import (
 	"context"
 
 	"datadog-exercise/internal/domain"
+	"datadog-exercise/internal/repository"
 )
 
-type bookService struct {
-	repo domain.BookRepository
+type BookService interface {
+	Create(ctx context.Context, book *domain.Book) error
+	GetAll(ctx context.Context) ([]domain.Book, error)
+	GetOne(ctx context.Context, id string) (*domain.Book, error)
 }
 
-func NewBookService(repo domain.BookRepository) BookService {
+type bookService struct {
+	repo repository.BookRepository
+}
+
+func NewBookService(repo repository.BookRepository) BookService {
 	return &bookService{repo: repo}
 }
 

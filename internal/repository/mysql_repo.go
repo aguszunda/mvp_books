@@ -8,11 +8,17 @@ import (
 	"datadog-exercise/internal/domain"
 )
 
+type BookRepository interface {
+	Create(ctx context.Context, book *domain.Book) error
+	FindAll(ctx context.Context) ([]domain.Book, error)
+	FindByID(ctx context.Context, id string) (*domain.Book, error)
+}
+
 type MysqlBookRepository struct {
 	db *gorm.DB
 }
 
-func NewMysqlBookRepository(db *gorm.DB) domain.BookRepository {
+func NewMysqlBookRepository(db *gorm.DB) BookRepository {
 	return &MysqlBookRepository{db: db}
 }
 

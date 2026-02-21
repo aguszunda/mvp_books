@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+
 	db, err := platform.InitDB()
 	if err != nil {
 		log.Fatal(err)

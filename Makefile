@@ -19,7 +19,7 @@ uncovered: coverage
 	@go tool cover -func=coverage.filtered.out | grep "0.0%" || echo "🎉 All logic is covered!"
 
 run:
-	go run cmd/api/main.go
+	DB_USER=user DB_PASSWORD=password DB_HOST=localhost DB_NAME=books_db go run cmd/api/main.go
 
 docker-up:
 	docker-compose up -d --build

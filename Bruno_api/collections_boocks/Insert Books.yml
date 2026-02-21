@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "title": "The Refactoring",
-        "author": "Martin Fowler"
+        "title": "The Refactoring code",
+        "author": "Martin Fowler Test"
       }
   auth: inherit
 

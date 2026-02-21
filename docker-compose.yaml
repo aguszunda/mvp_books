@@ -1,40 +1,55 @@
+# Define the list of services (containers) that make up the application
 services:
+  # The main application service (your Go API)
   app:
+    # Build the Docker image from the Dockerfile in the current directory (.)
     build: .
+    # Assign a specific name to the container for easier management
     container_name: go-books-api
+    # Map ports between the host machine and the container
     ports:
-      - "8080:8080"
+      - "8080:8080" # Map host port 8080 to container port 8080
+    # Set environment variables available inside the container
     environment:
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_HOST=db
-      - DB_NAME=books_db
-      # Point to SigNoz collector (assumed running on host)
-      # On Mac: host.docker.internal resolves to the host machine
-      - OTEL_EXPORTER_OTLP_ENDPOINT=host.docker.internal:4317
+      - DB_USER=user # Database username to use
+      - DB_PASSWORD=password # Database password to use
+      - DB_HOST=db # Hostname of the database (matches the service name below)
+      - DB_NAME=books_db # Name of the database to connect to
+    # Define startup dependency order
     depends_on:
-      - db
+      - db # Wait for the 'db' service to start before starting 'app'
+    # Connect this service to the specified network
     networks:
       - my-network
 
+  # The database service (MySQL)
   db:
+    # Use the official MySQL 8.0 image from Docker Hub
     image: mysql:8.0
+    # Assign a specific name to the container
     container_name: books-db
+    # Set environment variables to configure the MySQL instance
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_DATABASE=books_db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=rootpassword # Password for the root user
+      - MYSQL_DATABASE=books_db # Create this database on startup
+      - MYSQL_USER=user # Create this user
+      - MYSQL_PASSWORD=password # Password for the user
+    # Map ports to access the database from the host (optional for app, useful for tools)
     ports:
-      - "3306:3306"
+      - "3306:3306" # Map host port 3306 to container port 3306
+    # Connect this service to the same network as the app
     networks:
       - my-network
+    # Persist database data using a named volume
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql # Mount the 'db-data' volume to the MySQL data directory
 
+# Define the networks used by the services
 networks:
   my-network:
+    # Use the bridge driver (standard for standalone containers)
     driver: bridge
 
+# Define named volumes for persistent data storage
 volumes:
-  db-data:
+  db-data: # This volume will persist the database files even if the container is removed
