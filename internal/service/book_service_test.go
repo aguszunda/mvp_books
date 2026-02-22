@@ -14,13 +14,13 @@ import (
 func TestBookService_Create(t *testing.T) {
 	tests := []struct {
 		name      string
-		input     *domain.Book
+		book      *domain.Book
 		mockSetup func(*mocks.MockBookRepository)
 		expectErr bool
 	}{
 		{
-			name:  "Success",
-			input: &domain.Book{Title: "T1", Author: "A1"},
+			name: "Success",
+			book: &domain.Book{Title: "T1", Author: "A1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
 				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return nil
@@ -29,8 +29,8 @@ func TestBookService_Create(t *testing.T) {
 			expectErr: false,
 		},
 		{
-			name:  "Repo Error",
-			input: &domain.Book{Title: "T1"},
+			name: "Repo Error",
+			book: &domain.Book{Title: "T1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
 				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return errors.New("db error")
@@ -48,7 +48,7 @@ func TestBookService_Create(t *testing.T) {
 			}
 			svc := NewBookService(repo)
 
-			err := svc.Create(context.Background(), tt.input)
+			err := svc.Create(context.Background(), tt.book)
 
 			if tt.expectErr {
 				assert.Error(t, err)
