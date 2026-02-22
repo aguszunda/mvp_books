@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"datadog-exercise/internal/domain"
+	"datadog-exercise/internal/service/mocks"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -14,14 +15,14 @@ func TestBookService_Create(t *testing.T) {
 	tests := []struct {
 		name      string
 		input     *domain.Book
-		mockSetup func(*mockBookRepository)
+		mockSetup func(*mocks.MockBookRepository)
 		expectErr bool
 	}{
 		{
 			name:  "Success",
 			input: &domain.Book{Title: "T1", Author: "A1"},
-			mockSetup: func(m *mockBookRepository) {
-				m.createFunc = func(ctx context.Context, book *domain.Book) error {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
 					return nil
 				}
 			},
@@ -30,8 +31,8 @@ func TestBookService_Create(t *testing.T) {
 		{
 			name:  "Repo Error",
 			input: &domain.Book{Title: "T1"},
-			mockSetup: func(m *mockBookRepository) {
-				m.createFunc = func(ctx context.Context, book *domain.Book) error {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
 					return errors.New("db error")
 				}
 			},
@@ -41,7 +42,7 @@ func TestBookService_Create(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &mockBookRepository{}
+			repo := &mocks.MockBookRepository{}
 			if tt.mockSetup != nil {
 				tt.mockSetup(repo)
 			}
@@ -61,14 +62,14 @@ func TestBookService_Create(t *testing.T) {
 func TestBookService_GetAll(t *testing.T) {
 	tests := []struct {
 		name      string
-		mockSetup func(*mockBookRepository)
+		mockSetup func(*mocks.MockBookRepository)
 		expectErr bool
 		expectLen int
 	}{
 		{
 			name: "Success",
-			mockSetup: func(m *mockBookRepository) {
-				m.findAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.FindAllFunc = func(ctx context.Context) ([]domain.Book, error) {
 					return []domain.Book{{Title: "B1"}, {Title: "B2"}}, nil
 				}
 			},
@@ -77,8 +78,8 @@ func TestBookService_GetAll(t *testing.T) {
 		},
 		{
 			name: "Repo Error",
-			mockSetup: func(m *mockBookRepository) {
-				m.findAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.FindAllFunc = func(ctx context.Context) ([]domain.Book, error) {
 					return nil, errors.New("db error")
 				}
 			},
@@ -89,7 +90,7 @@ func TestBookService_GetAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &mockBookRepository{}
+			repo := &mocks.MockBookRepository{}
 			if tt.mockSetup != nil {
 				tt.mockSetup(repo)
 			}
@@ -111,15 +112,15 @@ func TestBookService_GetOne(t *testing.T) {
 	tests := []struct {
 		name      string
 		inputID   string
-		mockSetup func(*mockBookRepository)
+		mockSetup func(*mocks.MockBookRepository)
 		expectErr bool
 		expectVal *domain.Book
 	}{
 		{
 			name:    "Success",
 			inputID: "1",
-			mockSetup: func(m *mockBookRepository) {
-				m.findByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.FindByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
 					return &domain.Book{ID: 1, Title: "Found"}, nil
 				}
 			},
@@ -129,8 +130,8 @@ func TestBookService_GetOne(t *testing.T) {
 		{
 			name:    "Not Found",
 			inputID: "999",
-			mockSetup: func(m *mockBookRepository) {
-				m.findByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+			mockSetup: func(m *mocks.MockBookRepository) {
+				m.FindByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
 					return nil, errors.New("not found")
 				}
 			},
@@ -141,7 +142,7 @@ func TestBookService_GetOne(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo := &mockBookRepository{}
+			repo := &mocks.MockBookRepository{}
 			if tt.mockSetup != nil {
 				tt.mockSetup(repo)
 			}

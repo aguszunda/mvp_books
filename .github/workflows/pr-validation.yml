@@ -24,11 +24,9 @@ jobs:
         run: go mod download
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          # Opcional: si quieres que falle solo con errores graves
-          # args: --severity-level=error 
+          version: v1.64.8
 
       - name: Verify dependencies
         run: go mod verify
