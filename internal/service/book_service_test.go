@@ -120,7 +120,7 @@ func TestBookService_GetOne(t *testing.T) {
 			name:    "Success",
 			inputID: "1",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindByIDFunc = func(_ context.Context, id string) (*domain.Book, error) {
+				m.FindByIDFunc = func(_ context.Context, _ string) (*domain.Book, error) {
 					return &domain.Book{ID: 1, Title: "Found"}, nil
 				}
 			},
@@ -131,7 +131,7 @@ func TestBookService_GetOne(t *testing.T) {
 			name:    "Not Found",
 			inputID: "999",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindByIDFunc = func(_ context.Context, id string) (*domain.Book, error) {
+				m.FindByIDFunc = func(_ context.Context, _ string) (*domain.Book, error) {
 					return nil, errors.New("not found")
 				}
 			},
