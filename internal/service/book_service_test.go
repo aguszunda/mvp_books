@@ -22,7 +22,7 @@ func TestBookService_Create(t *testing.T) {
 			name:  "Success",
 			input: &domain.Book{Title: "T1", Author: "A1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return nil
 				}
 			},
@@ -32,7 +32,7 @@ func TestBookService_Create(t *testing.T) {
 			name:  "Repo Error",
 			input: &domain.Book{Title: "T1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return errors.New("db error")
 				}
 			},
@@ -69,7 +69,7 @@ func TestBookService_GetAll(t *testing.T) {
 		{
 			name: "Success",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.FindAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return []domain.Book{{Title: "B1"}, {Title: "B2"}}, nil
 				}
 			},
@@ -79,7 +79,7 @@ func TestBookService_GetAll(t *testing.T) {
 		{
 			name: "Repo Error",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.FindAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return nil, errors.New("db error")
 				}
 			},
@@ -120,7 +120,7 @@ func TestBookService_GetOne(t *testing.T) {
 			name:    "Success",
 			inputID: "1",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.FindByIDFunc = func(_ context.Context, id string) (*domain.Book, error) {
 					return &domain.Book{ID: 1, Title: "Found"}, nil
 				}
 			},
@@ -131,7 +131,7 @@ func TestBookService_GetOne(t *testing.T) {
 			name:    "Not Found",
 			inputID: "999",
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.FindByIDFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.FindByIDFunc = func(_ context.Context, id string) (*domain.Book, error) {
 					return nil, errors.New("not found")
 				}
 			},

@@ -35,7 +35,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			name:  "Success",
 			input: domain.Book{Title: "Test Book", Author: "Author"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return nil
 				}
 			},
@@ -45,7 +45,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			name:  "Service Error",
 			input: domain.Book{Title: "Test Book"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
 					return errors.New("database error")
 				}
 			},
@@ -82,7 +82,7 @@ func TestBookHandler_GetBooks(t *testing.T) {
 		{
 			name: "Success",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.GetAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return []domain.Book{{Title: "B1"}, {Title: "B2"}}, nil
 				}
 			},
@@ -91,7 +91,7 @@ func TestBookHandler_GetBooks(t *testing.T) {
 		{
 			name: "Service Error",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.GetAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return nil, errors.New("db error")
 				}
 			},
