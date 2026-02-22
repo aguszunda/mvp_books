@@ -128,7 +128,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 			name:   "Success",
 			bookID: "1",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetOneFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.GetOneFunc = func(_ context.Context, id string) (*domain.Book, error) {
 					if id == "1" {
 						return &domain.Book{ID: 1, Title: "Found"}, nil
 					}
@@ -141,7 +141,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 			name:   "Not Found",
 			bookID: "999",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetOneFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
 					return nil, errors.New("some error")
 				}
 			},
