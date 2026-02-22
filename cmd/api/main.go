@@ -1,20 +1,19 @@
 package main
 
 import (
-	"log"
-
-	"github.com/gin-gonic/gin"
-
 	"datadog-exercise/internal/controller"
 	"datadog-exercise/internal/domain"
 	"datadog-exercise/internal/repository"
 	"datadog-exercise/internal/service"
-	"datadog-exercise/platform"
+	"datadog-exercise/platform/connection"
+	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 
-	db, err := platform.InitDB()
+	db, err := connection.InitDB()
 	if err != nil {
 		log.Fatal(err)
 	}
