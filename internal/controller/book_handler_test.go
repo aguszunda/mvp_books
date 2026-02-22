@@ -35,7 +35,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			name:  "Success",
 			input: domain.Book{Title: "Test Book", Author: "Author"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return nil
 				}
 			},
@@ -45,7 +45,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			name:  "Service Error",
 			input: domain.Book{Title: "Test Book"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return errors.New("database error")
 				}
 			},

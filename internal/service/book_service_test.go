@@ -22,7 +22,7 @@ func TestBookService_Create(t *testing.T) {
 			name: "Success",
 			book: &domain.Book{Title: "T1", Author: "A1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return nil
 				}
 			},
@@ -32,7 +32,7 @@ func TestBookService_Create(t *testing.T) {
 			name: "Repo Error",
 			book: &domain.Book{Title: "T1"},
 			mockSetup: func(m *mocks.MockBookRepository) {
-				m.CreateFunc = func(_ context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return errors.New("db error")
 				}
 			},
