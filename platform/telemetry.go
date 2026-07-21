@@ -15,7 +15,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-func InitTelemetry(ctx context.Context) (func(context.Context) error, error) {
+func InitTelemetry(_ context.Context) (func(context.Context) error, error) {
 	exporter, err := otelprom.New()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create prometheus exporter: %w", err)

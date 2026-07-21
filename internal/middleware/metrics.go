@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Metrics(serviceName string) gin.HandlerFunc {
+func Metrics(_ string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		metrics.IncInFlight(c.Request.Context())

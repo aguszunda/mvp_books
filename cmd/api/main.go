@@ -29,7 +29,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize telemetry: %v", err)
 	}
-	defer shutdown(ctx)
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Printf("Failed to shutdown telemetry: %v", err)
+		}
+	}()
 
 	meter := otel.GetMeterProvider().Meter("books-api")
 	if err := initMetrics(meter); err != nil {

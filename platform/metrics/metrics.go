@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	HTTPRequestCount    metric.Int64Counter
-	HTTPRequestDuration metric.Float64Histogram
+	HTTPRequestCount     metric.Int64Counter
+	HTTPRequestDuration  metric.Float64Histogram
 	HTTPRequestsInFlight metric.Int64UpDownCounter
 )
 
