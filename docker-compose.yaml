@@ -9,12 +9,9 @@ services:
     # Map ports between the host machine and the container
     ports:
       - "8080:8080" # Map host port 8080 to container port 8080
-    # Set environment variables available inside the container
-    environment:
-      - DB_USER=user # Database username to use
-      - DB_PASSWORD=password # Database password to use
-      - DB_HOST=db # Hostname of the database (matches the service name below)
-      - DB_NAME=books_db # Name of the database to connect to
+    # Load environment variables from file
+    env_file:
+      - environment_values
     # Define startup dependency order
     depends_on:
       - db # Wait for the 'db' service to start before starting 'app'
@@ -28,12 +25,9 @@ services:
     image: mysql:8.0
     # Assign a specific name to the container
     container_name: books-db
-    # Set environment variables to configure the MySQL instance
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword # Password for the root user
-      - MYSQL_DATABASE=books_db # Create this database on startup
-      - MYSQL_USER=user # Create this user
-      - MYSQL_PASSWORD=password # Password for the user
+    # Load environment variables from file
+    env_file:
+      - environment_values
     # Map ports to access the database from the host (optional for app, useful for tools)
     ports:
       - "3306:3306" # Map host port 3306 to container port 3306
@@ -43,6 +37,7 @@ services:
     # Persist database data using a named volume
     volumes:
       - db-data:/var/lib/mysql # Mount the 'db-data' volume to the MySQL data directory
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql # Run init script on first startup
 
 # Define the networks used by the services
 networks:

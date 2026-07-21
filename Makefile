@@ -1,4 +1,4 @@
-.PHONY: test coverage run docker-up docker-down
+.PHONY: test coverage run run-local docker-up docker-down
 
 test:
 	go test ./... -v
@@ -19,7 +19,12 @@ uncovered: coverage
 	@go tool cover -func=coverage.filtered.out | grep "0.0%" || echo "🎉 All logic is covered!"
 
 run:
-	DB_USER=user DB_PASSWORD=password DB_HOST=localhost DB_NAME=books_db go run cmd/api/main.go
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db go run cmd/api/main.go
+
+run-local:
+	docker compose up -d db
+	@sleep 3
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db go run cmd/api/main.go
 
 docker-up:
 	docker-compose up -d --build
