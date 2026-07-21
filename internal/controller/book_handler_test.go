@@ -28,6 +28,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 	tests := []struct {
 		name           string
 		input          domain.Book
+		rawBody        string
 		mockSetup      func(*mocks.MockBookService)
 		expectedStatus int
 	}{
@@ -40,6 +41,11 @@ func TestBookHandler_CreateBook(t *testing.T) {
 				}
 			},
 			expectedStatus: http.StatusCreated,
+		},
+		{
+			name:           "Invalid JSON",
+			rawBody:        "{invalid",
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:  "Service Error",
@@ -61,7 +67,12 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			}
 			r := setupRouter(svc)
 
-			body, _ := json.Marshal(tt.input)
+			var body []byte
+			if tt.rawBody != "" {
+				body = []byte(tt.rawBody)
+			} else {
+				body, _ = json.Marshal(tt.input)
+			}
 			req, _ := http.NewRequest("POST", "/books", bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
