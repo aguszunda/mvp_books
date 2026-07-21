@@ -9,6 +9,7 @@ services:
     # Map ports between the host machine and the container
     ports:
       - "8080:8080" # Map host port 8080 to container port 8080
+      - "2223:2223" # Metrics endpoint for Prometheus
     # Load environment variables from file
     env_file:
       - environment_values
@@ -38,6 +39,36 @@ services:
     volumes:
       - db-data:/var/lib/mysql # Mount the 'db-data' volume to the MySQL data directory
       - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql # Run init script on first startup
+
+  # Prometheus metrics server
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - my-network
+
+  # Grafana dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - my-network
 
 # Define the networks used by the services
 networks:

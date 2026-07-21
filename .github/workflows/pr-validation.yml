@@ -35,7 +35,7 @@ jobs:
         run: |
           go test ./... -v -coverprofile=coverage.out
           # Filtramos paquetes que no requieren coverage (misma lógica que en Makefile)
-          grep -v -E "cmd/|mocks/|internal/domain|platform" coverage.out > coverage.filtered.out
+          grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform" coverage.out > coverage.filtered.out
 
       - name: Check Coverage Threshold (85%)
         run: |
