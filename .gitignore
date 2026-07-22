@@ -19,3 +19,4 @@ go.work
 scripts
 main
 # api
+environment_values

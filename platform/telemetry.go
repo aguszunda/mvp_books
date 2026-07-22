@@ -2,66 +2,57 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
+	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-func InitProvider() func(context.Context) error {
-	ctx := context.Background()
-
-	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceNameKey.String("go-books-api"),
-		),
-	)
+func InitTelemetry(_ context.Context) (func(context.Context) error, error) {
+	exporter, err := otelprom.New()
 	if err != nil {
-		log.Fatalf("failed to create resource: %v", err)
+		return nil, fmt.Errorf("failed to create prometheus exporter: %w", err)
 	}
 
-	// Connect to OTEL collector (SigNoz)
-	target := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if target == "" {
-		target = "localhost:4317"
-	}
-
-	log.Printf("Connecting to OTEL collector at %s", target)
-
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	conn, err := grpc.NewClient(target,
-		// Note the use of insecure transport here. TLS is recommended in production.
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	res := resource.NewWithAttributes(
+		semconv.SchemaURL,
+		semconv.ServiceNameKey.String("books-api"),
+		semconv.ServiceVersionKey.String("1.0.0"),
 	)
-	if err != nil {
-		log.Printf("failed to create gRPC connection to collector: %v", err)
-		return func(context.Context) error { return nil }
-	}
 
-	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
-	if err != nil {
-		log.Fatalf("failed to create trace exporter: %v", err)
-	}
-
-	bsp := sdktrace.NewBatchSpanProcessor(traceExporter)
-	tracerProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(res),
-		sdktrace.WithSpanProcessor(bsp),
+	provider := metric.NewMeterProvider(
+		metric.WithReader(exporter),
+		metric.WithResource(res),
 	)
-	otel.SetTracerProvider(tracerProvider)
 
-	// set global propagator to tracecontext (the default is no-op).
-	otel.SetTextMapPropagator(propagation.TraceContext{})
+	otel.SetMeterProvider(provider)
 
-	return tracerProvider.Shutdown
+	metricsPort := os.Getenv("METRICS_PORT")
+	if metricsPort == "" {
+		metricsPort = "2223"
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/metrics", promhttp.Handler())
+
+	server := &http.Server{
+		Addr:    ":" + metricsPort,
+		Handler: mux,
+	}
+
+	go func() {
+		log.Printf("Metrics server listening on :%s/metrics", metricsPort)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("Metrics server error: %v", err)
+		}
+	}()
+
+	return provider.Shutdown, nil
 }

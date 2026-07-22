@@ -1,4 +1,4 @@
-.PHONY: test coverage run docker-up docker-down
+.PHONY: test coverage run run-local docker-up docker-down
 
 test:
 	go test ./... -v
@@ -7,7 +7,7 @@ coverage:
 	@echo "Running tests with coverage..."
 	@go test ./... -coverprofile=coverage.out > /dev/null
 	@echo "Filtering out platform, mocks, and domain (interfaces)..."
-	@grep -v -E "cmd/|mocks/|internal/domain|platform" coverage.out > coverage.filtered.out
+	@grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform" coverage.out > coverage.filtered.out
 	@go tool cover -func=coverage.filtered.out
 	@echo "------------------------------------------------------------------"
 	@echo "Real Logic Coverage:"
@@ -19,7 +19,12 @@ uncovered: coverage
 	@go tool cover -func=coverage.filtered.out | grep "0.0%" || echo "🎉 All logic is covered!"
 
 run:
-	DB_USER=user DB_PASSWORD=password DB_HOST=localhost DB_NAME=books_db go run cmd/api/main.go
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 go run cmd/api/main.go
+
+run-local:
+	docker compose stop app 2>/dev/null; docker compose up -d db prometheus grafana
+	@sleep 3
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 go run cmd/api/main.go
 
 docker-up:
 	docker-compose up -d --build

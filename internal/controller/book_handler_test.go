@@ -28,6 +28,7 @@ func TestBookHandler_CreateBook(t *testing.T) {
 	tests := []struct {
 		name           string
 		input          domain.Book
+		rawBody        string
 		mockSetup      func(*mocks.MockBookService)
 		expectedStatus int
 	}{
@@ -35,17 +36,22 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			name:  "Success",
 			input: domain.Book{Title: "Test Book", Author: "Author"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return nil
 				}
 			},
 			expectedStatus: http.StatusCreated,
 		},
 		{
+			name:           "Invalid JSON",
+			rawBody:        "{invalid",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
 			name:  "Service Error",
 			input: domain.Book{Title: "Test Book"},
 			mockSetup: func(m *mocks.MockBookService) {
-				m.CreateFunc = func(ctx context.Context, book *domain.Book) error {
+				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return errors.New("database error")
 				}
 			},
@@ -61,7 +67,12 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			}
 			r := setupRouter(svc)
 
-			body, _ := json.Marshal(tt.input)
+			var body []byte
+			if tt.rawBody != "" {
+				body = []byte(tt.rawBody)
+			} else {
+				body, _ = json.Marshal(tt.input)
+			}
 			req, _ := http.NewRequest("POST", "/books", bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
@@ -82,7 +93,7 @@ func TestBookHandler_GetBooks(t *testing.T) {
 		{
 			name: "Success",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.GetAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return []domain.Book{{Title: "B1"}, {Title: "B2"}}, nil
 				}
 			},
@@ -91,7 +102,7 @@ func TestBookHandler_GetBooks(t *testing.T) {
 		{
 			name: "Service Error",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetAllFunc = func(ctx context.Context) ([]domain.Book, error) {
+				m.GetAllFunc = func(_ context.Context) ([]domain.Book, error) {
 					return nil, errors.New("db error")
 				}
 			},
@@ -128,7 +139,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 			name:   "Success",
 			bookID: "1",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetOneFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.GetOneFunc = func(_ context.Context, id string) (*domain.Book, error) {
 					if id == "1" {
 						return &domain.Book{ID: 1, Title: "Found"}, nil
 					}
@@ -141,7 +152,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 			name:   "Not Found",
 			bookID: "999",
 			mockSetup: func(m *mocks.MockBookService) {
-				m.GetOneFunc = func(ctx context.Context, id string) (*domain.Book, error) {
+				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
 					return nil, errors.New("some error")
 				}
 			},
