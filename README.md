@@ -256,6 +256,8 @@ config/
       api-monitoring.json    # Pre-configured 7-panel dashboard
 scripts/
   init.sql                   # DB schema + sample data (runs on first Docker startup)
+Bruno_api/
+  collections_boocks/        # Bruno API client collection for testing
 ```
 
 ## Make Commands
@@ -269,3 +271,21 @@ scripts/
 | `make test` | Run all tests |
 | `make coverage` | Run tests with filtered coverage report |
 | `make uncovered` | Show functions with 0% coverage |
+
+## Bruno API Client
+
+A [Bruno](https://www.usebruno.com/) collection is included for testing the API endpoints.
+
+### Requests
+
+| Request | Method | Endpoint | Description |
+|---|---|---|---|
+| Get Books | GET | `/books` | List all books |
+| Insert Books | POST | `/books` | Create a new book |
+| Get Book By Id | GET | `/books/:id` | Get a book by ID |
+
+### Usage
+
+1. Open Bruno and import the collection from `Bruno_api/collections_boocks/`
+2. Make sure the API is running (via `docker compose up -d --build` or `make run-local`)
+3. Select a request and click **Send**
