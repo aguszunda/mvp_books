@@ -1,8 +1,9 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -34,9 +35,6 @@ func (h *BookHandler) CreateBook(c *gin.Context) {
 }
 
 func (h *BookHandler) GetBooks(c *gin.Context) {
-	// Simulate latency as in original code
-	time.Sleep(50 * time.Millisecond)
-
 	books, err := h.service.GetAll(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -48,9 +46,18 @@ func (h *BookHandler) GetBooks(c *gin.Context) {
 
 func (h *BookHandler) GetBook(c *gin.Context) {
 	id := c.Param("id")
+	if _, err := strconv.Atoi(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid book id"})
+		return
+	}
+
 	book, err := h.service.GetOne(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
+		if errors.Is(err, domain.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "book not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

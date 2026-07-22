@@ -113,8 +113,9 @@ func TestMysqlBookRepository_FindByID(t *testing.T) {
 			WillReturnError(gorm.ErrRecordNotFound)
 
 		book, err := repo.FindByID(context.Background(), "999")
-		assert.Error(t, err) // GORM returns error on not found if checking .Error (which repo does)
+		assert.Error(t, err)
 		assert.Nil(t, book)
+		assert.Equal(t, domain.ErrNotFound, err)
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }

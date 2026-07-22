@@ -143,7 +143,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 					if id == "1" {
 						return &domain.Book{ID: 1, Title: "Found"}, nil
 					}
-					return nil, errors.New("not found in mock logic")
+					return nil, domain.ErrNotFound
 				}
 			},
 			expectedStatus: http.StatusOK,
@@ -153,10 +153,25 @@ func TestBookHandler_GetBook(t *testing.T) {
 			bookID: "999",
 			mockSetup: func(m *mocks.MockBookService) {
 				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
-					return nil, errors.New("some error")
+					return nil, domain.ErrNotFound
 				}
 			},
 			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name:   "Invalid ID",
+			bookID: "abc",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:   "DB Error",
+			bookID: "1",
+			mockSetup: func(m *mocks.MockBookService) {
+				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
+					return nil, errors.New("connection refused")
+				}
+			},
+			expectedStatus: http.StatusInternalServerError,
 		},
 	}
 
