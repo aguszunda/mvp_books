@@ -36,16 +36,14 @@ LOG_LEVEL=info
 docker compose up -d --build
 ```
 
-This starts 6 services on a shared Docker network:
+This starts 4 services on a shared Docker network:
 
 | Service | URL | Description |
 |---|---|---|
 | API | http://localhost:8080 | Books REST API |
-| Metrics | http://localhost:2223/metrics | Raw Prometheus metrics (OpenTelemetry) |
+| Metrics | http://localhost:2223/metrics | Raw Prometheus metrics (OpenTelemetry - logs) |
 | Prometheus | http://localhost:9090 | Metrics scraping & storage |
 | Grafana | http://localhost:3000 | Dashboards & visualization |
-| Loki | http://localhost:3100 | Log aggregation backend |
-| Promtail | - | Log shipper (sends Docker logs to Loki) |
 
 ### 3. Verify everything works
 
@@ -91,7 +89,7 @@ docker compose down -v
 make run-local
 ```
 
-Starts MySQL, Prometheus, Grafana, Loki, and Promtail in Docker, then runs the API on your machine.
+Starts MySQL, Prometheus, and Grafana in Docker, then runs the API on your machine.
 
 **Important:** The Grafana dashboard will **not** show data in this mode on macOS. Docker Desktop containers cannot reach the host's metrics port (`host.docker.internal` routing is broken on Mac). The raw metrics endpoint still works at http://localhost:2223/metrics. To use the full dashboard, run everything in Docker with `docker compose up -d --build`.
 
@@ -195,13 +193,9 @@ Labels:
 | `http.route` | `/books`, `/books/:id` |
 | `http.response.status_code` | `200`, `201`, `404` |
 
-### Grafana Dashboards
+### Grafana Dashboard
 
-Two dashboards are auto-provisioned:
-
-#### API Monitoring
-
-**Dashboards → API Monitoring → Books API Monitoring**
+A pre-configured dashboard is auto-provisioned at **Dashboards → API Monitoring → Books API Monitoring**.
 
 Connects to Prometheus. Includes 7 panels:
 
@@ -216,19 +210,6 @@ Connects to Prometheus. Includes 7 panels:
 | Request Duration Heatmap | Heatmap | Latency distribution across time |
 
 The dashboard datasource connects to Prometheus via the Docker network (`http://prometheus:9090`). If you modify `config/grafana/dashboards/api-monitoring.json`, Grafana will reload it within 10 seconds.
-
-#### Logs
-
-**Dashboards → API Monitoring → Books Logs**
-
-Connects to Loki. Includes 4 panels:
-
-| Panel | Type | Description |
-|---|---|---|
-| All Logs | Logs | Raw log stream from all containers |
-| API Errors | Logs | Filtered error-level log entries |
-| Logs by Service | Table | Log count grouped by Docker service |
-| Log Rate | Timeseries | Log ingestion rate over time |
 
 ### Raw Metrics
 
@@ -283,7 +264,6 @@ config/
         dashboard.yml        # File-based dashboard provisioning
     dashboards/
       api-monitoring.json    # Pre-configured 7-panel metrics dashboard
-      books-logs.json        # Pre-configured 4-panel logs dashboard
   loki/
     loki-config.yml          # Loki server configuration
   promtail/
