@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/repository"
+	"mvp_books/internal/domain"
+	"mvp_books/internal/repository"
 )
 
 type BookService interface {

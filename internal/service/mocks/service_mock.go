@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/domain"
 )
 
 // MockBookRepository manually mocks repository.BookRepository for unit tests.

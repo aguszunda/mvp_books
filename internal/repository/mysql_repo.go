@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/domain"
 )
 
 type BookRepository interface {

@@ -27,7 +27,7 @@ run-local:
 	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 go run cmd/api/main.go
 
 docker-up:
-	docker-compose up -d --build
+	docker compose up -d --build
 
 docker-down:
-	docker-compose down
+	docker compose down

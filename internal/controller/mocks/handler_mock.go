@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/domain"
 )
 
 // MockBookService manually mocks port.BookService

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/service/mocks"
+	"mvp_books/internal/domain"
+	"mvp_books/internal/service/mocks"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDB() (*gorm.DB, error) {
+func InitDB(ctx context.Context) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
@@ -23,12 +24,17 @@ func InitDB() (*gorm.DB, error) {
 	var err error
 
 	for i := 0; i < 30; i++ {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("database connection cancelled: %w", ctx.Err())
+		default:
+		}
+
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 		if err == nil {
 			log.Println("Connected to Database!")
 
-			// Use OTEL GORM Middleware
 			if err := db.Use(otelgorm.NewPlugin()); err != nil {
 				return nil, fmt.Errorf("failed to add otelgorm plugin: %v", err)
 			}

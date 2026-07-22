@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"testing"
 
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/domain"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

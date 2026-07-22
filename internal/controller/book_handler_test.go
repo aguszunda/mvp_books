@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"datadog-exercise/internal/controller/mocks"
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/controller/mocks"
+	"mvp_books/internal/domain"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -48,8 +48,13 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
+			name:           "Empty Fields",
+			rawBody:        `{"title": "", "author": ""}`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
 			name:  "Service Error",
-			input: domain.Book{Title: "Test Book"},
+			input: domain.Book{Title: "Test Book", Author: "Author"},
 			mockSetup: func(m *mocks.MockBookService) {
 				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return errors.New("database error")

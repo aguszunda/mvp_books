@@ -1,4 +1,4 @@
-module datadog-exercise
+module mvp_books
 
 go 1.24.0
 

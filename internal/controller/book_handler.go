@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/service"
+	"mvp_books/internal/domain"
+	"mvp_books/internal/service"
 )
 
 type BookHandler struct {

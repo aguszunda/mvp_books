@@ -4,14 +4,14 @@ import (
 	"context"
 	"log"
 
-	"datadog-exercise/internal/controller"
-	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/middleware"
-	"datadog-exercise/internal/repository"
-	"datadog-exercise/internal/service"
-	"datadog-exercise/platform"
-	"datadog-exercise/platform/connection"
-	"datadog-exercise/platform/metrics"
+	"mvp_books/internal/controller"
+	"mvp_books/internal/domain"
+	"mvp_books/internal/middleware"
+	"mvp_books/internal/repository"
+	"mvp_books/internal/service"
+	"mvp_books/platform"
+	"mvp_books/platform/connection"
+	"mvp_books/platform/metrics"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
@@ -40,7 +40,7 @@ func main() {
 		log.Fatalf("Failed to initialize metrics: %v", err)
 	}
 
-	db, err := connection.InitDB()
+	db, err := connection.InitDB(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
