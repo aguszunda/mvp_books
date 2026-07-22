@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/domain"
 )
 
 type BookRepository interface {
@@ -35,6 +36,9 @@ func (r *MysqlBookRepository) FindAll(ctx context.Context) ([]domain.Book, error
 func (r *MysqlBookRepository) FindByID(ctx context.Context, id string) (*domain.Book, error) {
 	var book domain.Book
 	if err := r.db.WithContext(ctx).First(&book, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrNotFound
+		}
 		return nil, err
 	}
 	return &book, nil

@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"datadog-exercise/platform/metrics"
+	"mvp_books/platform/metrics"
 
 	"github.com/gin-gonic/gin"
 )

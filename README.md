@@ -1,6 +1,6 @@
 # Go Books API
 
-REST API for managing books, built with Go (Gin), GORM, and MySQL. Includes a full observability stack with OpenTelemetry, Prometheus, and Grafana.
+REST API for managing books, built with Go (Gin), GORM, and MySQL. Includes a full observability stack with OpenTelemetry, Prometheus, Grafana, Loki, and Promtail for metrics and log aggregation.
 
 ## Prerequisites
 
@@ -27,6 +27,7 @@ MYSQL_DATABASE=books_db
 MYSQL_USER=developer
 MYSQL_PASSWORD=admin
 METRICS_PORT=2223
+LOG_LEVEL=info
 ```
 
 ### 2. Start everything
@@ -40,7 +41,7 @@ This starts 4 services on a shared Docker network:
 | Service | URL | Description |
 |---|---|---|
 | API | http://localhost:8080 | Books REST API |
-| Metrics | http://localhost:2223/metrics | Raw Prometheus metrics (OpenTelemetry) |
+| Metrics | http://localhost:2223/metrics | Raw Prometheus metrics (OpenTelemetry - logs) |
 | Prometheus | http://localhost:9090 | Metrics scraping & storage |
 | Grafana | http://localhost:3000 | Dashboards & visualization |
 
@@ -115,6 +116,7 @@ Environment variables are managed via the `environment_values` file (gitignored)
 | `MYSQL_USER` | developer | - | Auto-created MySQL user |
 | `MYSQL_PASSWORD` | admin | - | Auto-created MySQL password |
 | `METRICS_PORT` | 2223 | 2223 | Prometheus metrics endpoint port |
+| `LOG_LEVEL` | info | info | Log level (DEBUG, INFO, WARN, ERROR) |
 
 `DB_HOST` must be `db` when running inside Docker, `localhost` when running the API on your host machine.
 
@@ -161,11 +163,15 @@ curl http://localhost:8080/books/1
 
 ```
 API (:8080) ──HTTP──> Prometheus (:9090) ──query──> Grafana (:3000)
-     │
-     └──OTel SDK──> Prometheus exporter (:2223/metrics)
+     │                                                    ▲
+     └──OTel SDK──> Prometheus exporter (:2223)           │
+                                                          │
+Docker logs ──Promtail──> Loki (:3100) ───────────────────┘
 ```
 
 The API uses [OpenTelemetry](https://opentelemetry.io/) to instrument HTTP requests. A Prometheus exporter runs on a separate port (`:2223`) and exposes metrics in Prometheus format. Prometheus scrapes this endpoint every 10 seconds. Grafana connects to Prometheus as a data source and displays a pre-configured dashboard.
+
+For log aggregation, [Promtail](https://grafana.com/docs/loki/latest/send-data/promtail/) ships Docker container logs to [Loki](https://grafana.com/oss/loki/), which stores and indexes them. Grafana connects to Loki as a second data source, enabling log search and correlation with metrics.
 
 ### Available Metrics
 
@@ -191,7 +197,7 @@ Labels:
 
 A pre-configured dashboard is auto-provisioned at **Dashboards → API Monitoring → Books API Monitoring**.
 
-It includes 7 panels:
+Connects to Prometheus. Includes 7 panels:
 
 | Panel | Type | Description |
 |---|---|---|
@@ -237,9 +243,12 @@ internal/
   repository/                # Data persistence (GORM/MySQL)
   domain/                    # Entities & repository interfaces
   middleware/
+    logging.go               # Gin middleware: structured request logging (slog)
     metrics.go               # Gin middleware: records request count, duration, in-flight
 platform/
   connection/                # DB initialization (GORM)
+  logger/
+    logger.go                # Structured JSON logger init (slog)
   metrics/
     metrics.go               # OTel metric definitions (counter, histogram, updowncounter)
   telemetry.go               # OTel SDK init + Prometheus exporter + metrics HTTP server
@@ -250,10 +259,15 @@ config/
     provisioning/
       datasources/
         datasource.yml       # Prometheus datasource (uid: prometheus)
+        loki.yml             # Loki datasource (uid: loki)
       dashboards/
         dashboard.yml        # File-based dashboard provisioning
     dashboards/
-      api-monitoring.json    # Pre-configured 7-panel dashboard
+      api-monitoring.json    # Pre-configured 7-panel metrics dashboard
+  loki/
+    loki-config.yml          # Loki server configuration
+  promtail/
+    config.yml               # Promtail log shipper configuration
 scripts/
   init.sql                   # DB schema + sample data (runs on first Docker startup)
 Bruno_api/

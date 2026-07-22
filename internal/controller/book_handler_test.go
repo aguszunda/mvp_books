@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"datadog-exercise/internal/controller/mocks"
-	"datadog-exercise/internal/domain"
+	"mvp_books/internal/controller/mocks"
+	"mvp_books/internal/domain"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -48,8 +48,13 @@ func TestBookHandler_CreateBook(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
+			name:           "Empty Fields",
+			rawBody:        `{"title": "", "author": ""}`,
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
 			name:  "Service Error",
-			input: domain.Book{Title: "Test Book"},
+			input: domain.Book{Title: "Test Book", Author: "Author"},
 			mockSetup: func(m *mocks.MockBookService) {
 				m.CreateFunc = func(_ context.Context, _ *domain.Book) error {
 					return errors.New("database error")
@@ -143,7 +148,7 @@ func TestBookHandler_GetBook(t *testing.T) {
 					if id == "1" {
 						return &domain.Book{ID: 1, Title: "Found"}, nil
 					}
-					return nil, errors.New("not found in mock logic")
+					return nil, domain.ErrNotFound
 				}
 			},
 			expectedStatus: http.StatusOK,
@@ -153,10 +158,25 @@ func TestBookHandler_GetBook(t *testing.T) {
 			bookID: "999",
 			mockSetup: func(m *mocks.MockBookService) {
 				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
-					return nil, errors.New("some error")
+					return nil, domain.ErrNotFound
 				}
 			},
 			expectedStatus: http.StatusNotFound,
+		},
+		{
+			name:           "Invalid ID",
+			bookID:         "abc",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:   "DB Error",
+			bookID: "1",
+			mockSetup: func(m *mocks.MockBookService) {
+				m.GetOneFunc = func(_ context.Context, _ string) (*domain.Book, error) {
+					return nil, errors.New("connection refused")
+				}
+			},
+			expectedStatus: http.StatusInternalServerError,
 		},
 	}
 
