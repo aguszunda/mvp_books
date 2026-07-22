@@ -159,8 +159,8 @@ func TestBookHandler_GetBook(t *testing.T) {
 			expectedStatus: http.StatusNotFound,
 		},
 		{
-			name:   "Invalid ID",
-			bookID: "abc",
+			name:           "Invalid ID",
+			bookID:         "abc",
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
