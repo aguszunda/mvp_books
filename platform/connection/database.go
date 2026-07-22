@@ -3,7 +3,7 @@ package connection
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -33,7 +33,7 @@ func InitDB(ctx context.Context) (*gorm.DB, error) {
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 		if err == nil {
-			log.Println("Connected to Database!")
+			slog.Info("connected to database")
 
 			if err := db.Use(otelgorm.NewPlugin()); err != nil {
 				return nil, fmt.Errorf("failed to add otelgorm plugin: %v", err)
@@ -42,7 +42,7 @@ func InitDB(ctx context.Context) (*gorm.DB, error) {
 			return db, nil
 		}
 
-		log.Printf("Failed to connect to GORM DB: %v, retrying...", err)
+		slog.Warn("failed to connect to database, retrying", "error", err, "attempt", i+1)
 		time.Sleep(2 * time.Second)
 	}
 

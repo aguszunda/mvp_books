@@ -3,7 +3,7 @@ package platform
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -48,9 +48,9 @@ func InitTelemetry(_ context.Context) (func(context.Context) error, error) {
 	}
 
 	go func() {
-		log.Printf("Metrics server listening on :%s/metrics", metricsPort)
+		slog.Info("metrics server listening", "port", metricsPort)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Printf("Metrics server error: %v", err)
+			slog.Error("metrics server error", "error", err)
 		}
 	}()
 

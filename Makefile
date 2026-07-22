@@ -19,12 +19,12 @@ uncovered: coverage
 	@go tool cover -func=coverage.filtered.out | grep "0.0%" || echo "🎉 All logic is covered!"
 
 run:
-	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 go run cmd/api/main.go
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 LOG_LEVEL=info go run cmd/api/main.go
 
 run-local:
-	docker compose stop app 2>/dev/null; docker compose up -d db prometheus grafana
+	docker compose stop app 2>/dev/null; docker compose up -d db prometheus grafana loki promtail
 	@sleep 3
-	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 go run cmd/api/main.go
+	DB_USER=developer DB_PASSWORD=admin DB_HOST=localhost DB_NAME=books_db METRICS_PORT=2223 LOG_LEVEL=info go run cmd/api/main.go
 
 docker-up:
 	docker compose up -d --build
