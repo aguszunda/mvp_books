@@ -7,7 +7,7 @@ coverage:
 	@echo "Running tests with coverage..."
 	@go test ./... -coverprofile=coverage.out > /dev/null
 	@echo "Filtering out platform, mocks, and domain (interfaces)..."
-	@grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform" coverage.out > coverage.filtered.out
+	@grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform|scripts" coverage.out > coverage.filtered.out
 	@go tool cover -func=coverage.filtered.out
 	@echo "------------------------------------------------------------------"
 	@echo "Real Logic Coverage:"
