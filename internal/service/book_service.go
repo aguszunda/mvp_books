@@ -3,26 +3,32 @@ package service
 import (
 	"context"
 
-	"datadog-exercise/internal/domain"
-	"datadog-exercise/internal/port"
+	"mvp_books/internal/domain"
+	"mvp_books/internal/repository"
 )
 
-type BookService struct {
-	repo port.BookRepository
+type BookService interface {
+	Create(ctx context.Context, book *domain.Book) error
+	GetAll(ctx context.Context) ([]domain.Book, error)
+	GetOne(ctx context.Context, id string) (*domain.Book, error)
 }
 
-func NewBookService(repo port.BookRepository) port.BookService {
-	return &BookService{repo: repo}
+type bookService struct {
+	repo repository.BookRepository
 }
 
-func (s *BookService) Create(ctx context.Context, book *domain.Book) error {
+func NewBookService(repo repository.BookRepository) BookService {
+	return &bookService{repo: repo}
+}
+
+func (s *bookService) Create(ctx context.Context, book *domain.Book) error {
 	return s.repo.Create(ctx, book)
 }
 
-func (s *BookService) GetAll(ctx context.Context) ([]domain.Book, error) {
+func (s *bookService) GetAll(ctx context.Context) ([]domain.Book, error) {
 	return s.repo.FindAll(ctx)
 }
 
-func (s *BookService) GetOne(ctx context.Context, id string) (*domain.Book, error) {
+func (s *bookService) GetOne(ctx context.Context, id string) (*domain.Book, error) {
 	return s.repo.FindByID(ctx, id)
 }

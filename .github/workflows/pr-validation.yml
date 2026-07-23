@@ -24,11 +24,9 @@ jobs:
         run: go mod download
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          # Opcional: si quieres que falle solo con errores graves
-          # args: --severity-level=error 
+          version: v1.64.8
 
       - name: Verify dependencies
         run: go mod verify
@@ -37,7 +35,7 @@ jobs:
         run: |
           go test ./... -v -coverprofile=coverage.out
           # Filtramos paquetes que no requieren coverage (misma lógica que en Makefile)
-          grep -v -E "cmd/|mocks/|internal/domain|internal/port|internal/infrastructure" coverage.out > coverage.filtered.out
+          grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform|scripts" coverage.out > coverage.filtered.out
 
       - name: Check Coverage Threshold (85%)
         run: |

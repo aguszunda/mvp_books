@@ -1,0 +1,10 @@
+DB_USER=developer
+DB_PASSWORD=changeme
+DB_NAME=books_db
+DB_HOST=db
+MYSQL_ROOT_PASSWORD=changeme
+MYSQL_DATABASE=books_db
+MYSQL_USER=developer
+MYSQL_PASSWORD=changeme
+METRICS_PORT=2223
+LOG_LEVEL=info

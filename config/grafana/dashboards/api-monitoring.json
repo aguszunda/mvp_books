@@ -1,0 +1,205 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=\"http.server.request.count_total\"}[5m])) by (\"http.method\", \"http.route\")",
+          "legendFormat": "{{http.method}} {{http.route}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Request Latency (P50 / P95 / P99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate({__name__=\"http.server.request.duration_seconds_bucket\"}[5m])) by (le, \"http.route\"))",
+          "legendFormat": "P50 {{http.route}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate({__name__=\"http.server.request.duration_seconds_bucket\"}[5m])) by (le, \"http.route\"))",
+          "legendFormat": "P95 {{http.route}}",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate({__name__=\"http.server.request.duration_seconds_bucket\"}[5m])) by (le, \"http.route\"))",
+          "legendFormat": "P99 {{http.route}}",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Error Rate (5xx)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=\"http.server.request.count_total\", \"http.response.status_code\"=~\"5..\"}[5m])) by (\"http.route\") / sum(rate({__name__=\"http.server.request.count_total\"}[5m])) by (\"http.route\") * 100",
+          "legendFormat": "{{http.route}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "In-Flight Requests",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "{__name__=\"http.server.request.inflight\"}",
+          "legendFormat": "In-Flight",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Total Requests by Status Code",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase({__name__=\"http.server.request.count_total\"}[1h])) by (\"http.response.status_code\")",
+          "legendFormat": "{{http.response.status_code}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Avg Request Duration by Endpoint",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(rate({__name__=\"http.server.request.duration_seconds_sum\"}[5m])) by (\"http.route\") / sum(rate({__name__=\"http.server.request.duration_seconds_count\"}[5m])) by (\"http.route\")",
+          "legendFormat": "{{http.route}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "red", "value": 2 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Request Duration Heatmap",
+      "type": "heatmap",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "expr": "sum(increase({__name__=\"http.server.request.duration_seconds_bucket\"}[5m])) by (le)",
+          "legendFormat": "{{le}}",
+          "refId": "A",
+          "format": "heatmap"
+        }
+      ],
+      "options": {
+        "calculate": false,
+        "yAxis": {
+          "unit": "s"
+        }
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["api", "monitoring", "books"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Books API Monitoring",
+  "uid": "books-api-monitoring",
+  "version": 2
+}

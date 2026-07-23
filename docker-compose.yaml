@@ -1,40 +1,110 @@
+# Define the list of services (containers) that make up the application
 services:
+  # The main application service (your Go API)
   app:
+    # Build the Docker image from the Dockerfile in the current directory (.)
     build: .
+    # Assign a specific name to the container for easier management
     container_name: go-books-api
+    # Map ports between the host machine and the container
     ports:
-      - "8080:8080"
-    environment:
-      - DB_USER=root
-      - DB_PASSWORD=admin2023
-      - DB_HOST=db
-      - DB_NAME=books_db
-      # Point to SigNoz collector (assumed running on host)
-      # On Mac: host.docker.internal resolves to the host machine
-      - OTEL_EXPORTER_OTLP_ENDPOINT=host.docker.internal:4317
+      - "8080:8080" # Map host port 8080 to container port 8080
+      - "2223:2223" # Metrics endpoint for Prometheus
+    # Load environment variables from file
+    env_file:
+      - environment_values
+    # Define startup dependency order
     depends_on:
-      - db
+      - db # Wait for the 'db' service to start before starting 'app'
+    # Connect this service to the specified network
     networks:
       - my-network
 
+  # The database service (MySQL)
   db:
+    # Use the official MySQL 8.0 image from Docker Hub
     image: mysql:8.0
+    # Assign a specific name to the container
     container_name: books-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=admin2023
-      - MYSQL_DATABASE=books_db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
+    # Load environment variables from file
+    env_file:
+      - environment_values
+    # Map ports to access the database from the host (optional for app, useful for tools)
     ports:
-      - "3306:3306"
+      - "3306:3306" # Map host port 3306 to container port 3306
+    # Connect this service to the same network as the app
     networks:
       - my-network
+    # Persist database data using a named volume
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/mysql # Mount the 'db-data' volume to the MySQL data directory
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql # Run init script on first startup
 
+  # Prometheus metrics server
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - my-network
+
+  # Grafana dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - my-network
+
+  # Log aggregation
+  loki:
+    image: grafana/loki:3.4.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./config/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - my-network
+
+  # Log shipper
+  promtail:
+    image: grafana/promtail:3.4.2
+    container_name: promtail
+    volumes:
+      - ./config/promtail/config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - my-network
+
+# Define the networks used by the services
 networks:
   my-network:
+    # Use the bridge driver (standard for standalone containers)
     driver: bridge
 
+# Define named volumes for persistent data storage
 volumes:
-  db-data:
+  db-data: # This volume will persist the database files even if the container is removed
+  loki-data:

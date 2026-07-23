@@ -1,0 +1,22 @@
+info:
+  name: Insert Books
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/books
+  body:
+    type: json
+    data: |-
+      {
+        "title": "The Refactoring code 12",
+        "author": "Martin Fowler Test"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
