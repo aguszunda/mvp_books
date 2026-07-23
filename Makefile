@@ -1,4 +1,4 @@
-.PHONY: test coverage run run-local docker-up docker-down
+.PHONY: test coverage run run-local docker-up docker-down bulk-insert
 
 test:
 	go test ./... -v
@@ -31,3 +31,6 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+bulk-insert:
+	@go run scripts/bulk_insert.go $(CSV) $(API_URL)
