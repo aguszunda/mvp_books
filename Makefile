@@ -1,4 +1,4 @@
-.PHONY: test coverage run run-local docker-up docker-down
+.PHONY: test coverage run run-local docker-up docker-down bulk-insert
 
 test:
 	go test ./... -v
@@ -7,7 +7,7 @@ coverage:
 	@echo "Running tests with coverage..."
 	@go test ./... -coverprofile=coverage.out > /dev/null
 	@echo "Filtering out platform, mocks, and domain (interfaces)..."
-	@grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform" coverage.out > coverage.filtered.out
+	@grep -v -E "cmd/|mocks/|internal/domain|internal/middleware|platform|scripts" coverage.out > coverage.filtered.out
 	@go tool cover -func=coverage.filtered.out
 	@echo "------------------------------------------------------------------"
 	@echo "Real Logic Coverage:"
@@ -31,3 +31,6 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+bulk-insert:
+	@go run scripts/bulk_insert.go $(CSV) $(API_URL)
